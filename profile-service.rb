@@ -42,7 +42,7 @@ $:.unshift(File.dirname(__FILE__) + "/uuidtools/lib")
 require 'uuidtools'
 
 # explicitly set this to host ip or name if more than one interface exists
-@@address = ENV['HOSTNAME']
+@@address = '34.248.222.32'
 
 def local_ip
     # turn off reverse DNS resolution temporarily
@@ -130,7 +130,8 @@ end
 def service_address(request)
     address = "localhost"
     if request.addr.size > 0
-        host, port = request.addr[2], request.addr[1]
+        # host, port = request.addr[2], request.addr[1]
+        host, port = '34.248.222.32', request.addr[1]
     end
     host.to_s + ":" + port.to_s
 end
@@ -341,7 +342,8 @@ end
 def init
 
     if @@address == "AUTOMATIC"
-        @@address = local_ip
+        # @@address = local_ip
+        @@address = '34.248.222.32'
         print "*** detected address #{@@address} ***\n"
     end
 
@@ -422,6 +424,15 @@ end
 *************************************************************************
 =end
 
+module WEBrick
+  module HTTPServlet
+    class ProcHandler
+      alias do_PUT    do_GET
+      alias do_DELETE do_GET
+    end
+  end
+end
+
 init()
 
 world = WEBrick::HTTPServer.new(
@@ -474,6 +485,12 @@ world.mount_proc("/enroll") { |req, res|
             configuration, [], OpenSSL::PKCS7::BINARY)
     res.body = signed_profile.to_der
 
+}
+
+world.mount_proc("/checkin") { |req, res|
+    print "CHECKIN\n"
+    print req.body
+    print "\n"
 }
 
 world.mount_proc("/profile") { |req, res|
